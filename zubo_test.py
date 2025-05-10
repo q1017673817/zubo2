@@ -39,16 +39,16 @@ def check_ip_port(ip_port, url_end):
         resp.raise_for_status()
         if "Multi stream daemon" in resp.text or "udpxy status" in resp.text:
             print(f"{url} 访问成功")
-            return ip_port
+            return url
     except:
         return None
-# 多线程检测url，获取有效ip_port
+# 多线程检测url，获取有效urls
 def scan_ip_port(ip, port, option, url_end):
     def show_progress():
         while checked[0] < len(ip_ports) and option == 1:
-            print(f"已扫描：{checked[0]}/{len(ip_ports)}, 有效ip_port：{len(valid_ip_ports)}个")
+            print(f"已扫描：{checked[0]}/{len(ip_ports)}, 有效ip_port：{len(valid_urls)}个")
             time.sleep(20)
-    valid_ip_ports = []
+    valid_urls = []
     ip_ports = generate_ip_ports(ip, port, option)
     checked = [0]
     Thread(target=show_progress, daemon=True).start()
@@ -57,25 +57,27 @@ def scan_ip_port(ip, port, option, url_end):
         for future in as_completed(futures):
             result = future.result()
             if result:
-                valid_ip_ports.append(result)
+                valid_urls.append(result)
             checked[0] += 1
-    return valid_ip_ports
+    return valid_urls
 
 def multicast_province(config_file):
     filename = os.path.basename(config_file)
     province, operator = filename.split('_')[:2]
     print(f"{'='*25}\n   获取: {province}{operator}ip_port\n{'='*25}")
     configs = sorted(set(read_config(config_file)))
-    valid_ip_ports = []
+    valid_urls = []
     for ip, port, option in configs:
         url_ends = ["/stat", "/status"]
         for url_end in url_ends:
             print(f"\n开始扫描 ip：{ip}，port：{port}，url_end：{url_end} ")
-            valid_ip_ports.extend(scan_ip_port(ip, port, option, url_end))
-    valid_ip_ports = sorted(set(valid_ip_ports))
-    print(f"{province}{operator} 扫描完成，获取有效ip_port共：{len(valid_ip_ports)}个\n{valid_ip_ports}")
+            valid_urls.extend(scan_ip_port(ip, port, option, url_end))
+    valid_urls = sorted(set(valid_urls))
+    print(f"{province}{operator} 扫描完成，获取有效ip_port共：{len(valid_urls)}个")
+    for url in valid_urls:
+        print(url)
     with open(f"ip/{province}{operator}_ip.txt", 'a', encoding='utf-8') as f:
-        f.write('\n'.join(valid_ip_ports) + '\n')    #有效ip_port写入文件
+        f.write('\n'.join(valid_urls) + '\n')   #有效url写入文件
 
 print("\n开始获取组播源")
 for config_file in glob.glob(os.path.join('ip', '*_config.txt')):
