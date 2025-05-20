@@ -47,7 +47,7 @@ def scan_ip_port(ip, port, option, url_end):
     def show_progress():
         while checked[0] < len(ip_ports) and option == 1:
             print(f"已扫描：{checked[0]}/{len(ip_ports)}, 有效ip_port：{len(valid_urls)}个")
-            time.sleep(20)
+            time.sleep(80)
     valid_urls = []
     ip_ports = generate_ip_ports(ip, port, option)
     checked = [0]
