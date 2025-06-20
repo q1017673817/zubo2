@@ -1,0 +1,37 @@
+name: 辽宁联通
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install requests futures
+
+      - name: 获取组播ip
+        run: |
+          cd $GITHUB_WORKSPACE
+          python ./辽宁联通.py
+                    
+      - name: 提交更新
+        run: |
+          git pull
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "更新组播ip"
+          git push                
